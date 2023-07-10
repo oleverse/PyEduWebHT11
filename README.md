@@ -4,10 +4,10 @@
 `docker run --name fastapi-postgres -p 5432:5432 -e POSTGRES_PASSWORD=<secret> -d postgres`
 3. Створюємо базу даних (приклад створення за допомогою psql):  
 Підключаємося до БД:  
-`psql --host localhost --port 5432 --username=postgres --dbname`  
+`psql --host localhost --port 5432 --username=postgres`  
 PostgreSQL запитає пароль, вводимо пароль нашого контейнера  
 Виконаємо запит для створення БД:  
-`CREATE DATABASE <db_name> ENCODING 'UTF-8'`  
+`CREATE DATABASE <db_name> ENCODING 'UTF-8';`  
 Відключаємося від БД:  
 `\q` => `Enter`
 4. Створимо віртуальне середовище і встановимо залежності:     
@@ -23,6 +23,6 @@ PostgreSQL запитає пароль, вводимо пароль нашого
 7. Запускаємо uvicorn сервер  
 `uvicorn main:app --host=localhost --port=8000 --reload`  
 8. Відкриваємо у браузері адресу застосунку і граємося з запитами :)    
-`http://127.0.0.1:8000`
+`http://127.0.0.1:8000/docs`
 9. Для отримання списку контактів, у яких ДН найближчого тижня, потрібно задати Query параметрові
 `bt_within_week` значення `true` або `1`
