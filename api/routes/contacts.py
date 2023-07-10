@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, status, HTTPException, Query
 from api.schemas import ContactBase, ContactResponse, ContactUpdate
-from api.database.db import get_db
+from api.database.db import get_db, NotUniqueException
+from api.database.models import User
 from sqlalchemy.orm import Session
 from typing import Annotated
+from api.services.auth import auth_service
 
 from api.repository import contacts as repository_contacts
 
@@ -26,38 +28,47 @@ async def read_contacts(skip: int = 0, limit: int = 100,
                         bt_within_week: Annotated[bool | None, Query(
                             description="If true only contacts with birth date within 7 days will be shown."
                         )] = None,
-                        db: Session = Depends(get_db)):
+                        db: Session = Depends(get_db),
+                        current_user: User = Depends(auth_service.get_current_user)):
 
     query_params = {"first_name": first_name, "last_name": last_name,
                     "email": email, "bt_within_week": bt_within_week}
-    contacts = await repository_contacts.get_contacts(skip, limit, query_params, db)
+    contacts = await repository_contacts.get_contacts(skip, limit, query_params, current_user, db)
     return contacts
 
 
 @router.get("/{contact_id}", response_model=ContactResponse)
-async def read_contact(contact_id: int, db: Session = Depends(get_db)):
-    contact = await repository_contacts.get_contact(contact_id, db)
+async def read_contact(contact_id: int, db: Session = Depends(get_db),
+                       current_user: User = Depends(auth_service.get_current_user)):
+    contact = await repository_contacts.get_contact(contact_id, current_user, db)
     if contact is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
     return contact
 
 
-@router.post("/", response_model=ContactResponse)
-async def create_contact(body: ContactBase, db: Session = Depends(get_db)):
-    return await repository_contacts.create_contact(body, db)
+@router.post("/", response_model=ContactResponse, status_code=status.HTTP_201_CREATED)
+async def create_contact(body: ContactBase, db: Session = Depends(get_db),
+                         current_user: User = Depends(auth_service.get_current_user)):
+    try:
+        contact = await repository_contacts.create_contact(body, current_user, db)
+    except NotUniqueException as not_unique_error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(not_unique_error))
+    return contact
 
 
 @router.put("/{contact_id}", response_model=ContactResponse)
-async def update_contact(body: ContactUpdate, contact_id: int, db: Session = Depends(get_db)):
-    contact = await repository_contacts.update_contact(contact_id, body, db)
+async def update_contact(body: ContactUpdate, contact_id: int, db: Session = Depends(get_db),
+                         current_user: User = Depends(auth_service.get_current_user)):
+    contact = await repository_contacts.update_contact(contact_id, body, current_user, db)
     if contact is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
     return contact
 
 
 @router.delete("/{contact_id}", response_model=ContactResponse)
-async def remove_contact(contact_id: int, db: Session = Depends(get_db)):
-    contact = await repository_contacts.remove_contact(contact_id, db)
+async def remove_contact(contact_id: int, db: Session = Depends(get_db),
+                         current_user: User = Depends(auth_service.get_current_user)):
+    contact = await repository_contacts.remove_contact(contact_id, current_user, db)
     if contact is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
     return contact

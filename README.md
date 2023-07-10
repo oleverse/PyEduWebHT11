@@ -1,7 +1,7 @@
 **Послідовність запуску:**
-1. `git clone git@github.com:oleverse/PyEduWebHT11.git`
+1. `git clone -b hometask-12 git@github.com:oleverse/PyEduWebHT11.git PyEduWebHT12`
 2. Створимо і запустимо контейнер з БД:  
-`docker run --name fastapi-postgres -p 5432:5432 -e POSTGRES_PASSWORD=<secret> -d postgres`
+`docker run --name fastapi-auth-postgres -p 5432:5432 -e POSTGRES_PASSWORD=<secret> -d postgres`
 3. Створюємо базу даних (приклад створення за допомогою psql):  
 Підключаємося до БД:  
 `psql --host localhost --port 5432 --username=postgres`  
@@ -11,7 +11,7 @@ PostgreSQL запитає пароль, вводимо пароль нашого
 Відключаємося від БД:  
 `\q` => `Enter`
 4. Створимо віртуальне середовище і встановимо залежності:     
-`cd PyEduWebHT11`  
+`cd PyEduWebHT12`  
 `poetry shell`  
 `poetry update`
 5. Далі створюємо файл .env з таким вмістом:  
@@ -22,7 +22,16 @@ PostgreSQL запитає пароль, вводимо пароль нашого
 `alembic upgrade head`
 7. Запускаємо uvicorn сервер  
 `uvicorn main:app --host=localhost --port=8000 --reload`  
-8. Відкриваємо у браузері адресу застосунку і граємося з запитами :)    
-`http://127.0.0.1:8000/docs`
-9. Для отримання списку контактів, у яких ДН найближчого тижня, потрібно задати Query параметрові
-`bt_within_week` значення `true` або `1`
+8. Ця робота не сильно відрізняється за функціоналом від попередньої (`PyEduWebHT11`).  
+Але для тестування операцій, які потребують авторизації і роботи з JWT токенами, я вирішив
+додати до репозиторію каталог `postman`, а у ньому можна знайти два JSON-файла.  
+Це імпортоване Postman-середовище, у якому створені дві змінні для зберігання
+токенів після автентифікації і імпортована Postman-колекція попередньо заготовлених запитів.
+9. Тому можна відкрити `Postman`, натиснути `File -> Import` і обрати файли
+`PyEduWebHT12.postman_environment.json` та `PyEduWebHT12.postman_collection.json`
+10. Після імпорту не забуваємо перемкнутися на імпортоване середовище у правому верхньому кутку
+вікна `Postman`, тобто змінити `No Environment` на `PyEduWebHT12`
+11. Далі можна користуватися колекцію імпортованих запитів.
+12. Маємо на увазі, що запити `Login` та `Refresh Token` після отримання відповіді від
+сервера автоматично зберігають `access_token` i `refresh_token` для подальшої роботи і
+робити це вручну не потрібно.

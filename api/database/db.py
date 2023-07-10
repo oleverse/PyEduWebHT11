@@ -18,3 +18,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+class NotUniqueException(Exception):
+    pass
