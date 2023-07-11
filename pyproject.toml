@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "hometask-11"
+name = "hometask-12"
 version = "0.1.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["Oleksii Petrashov oleksii@petrashov@gmail.com>"]
 readme = "README.md"
-packages = [{include = "hometask_11"}]
+packages = []
 
 [tool.poetry.dependencies]
 python = "^3.11"
