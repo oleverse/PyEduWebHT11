@@ -17,7 +17,7 @@ class ContactResponse(ContactBase):
     created_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class ContactUpdate(ContactBase):
@@ -43,7 +43,7 @@ class UserDb(BaseModel):
     avatar: str
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class UserResponse(BaseModel):
@@ -55,3 +55,7 @@ class TokenModel(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+
+
+class RequestEmail(BaseModel):
+    email: EmailStr

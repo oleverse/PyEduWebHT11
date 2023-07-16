@@ -1,0 +1,35 @@
+# if you want to use any other supported by SQLAlchemy DB service instead of Postgres,
+# you should change docker-compose.yml first
+DB_USER=
+DB_PASSW=
+DB_HOST=
+DB_PORT=
+DB_NAME=
+# i.e. postgresql+psycopg2
+DB_SCHEMA=
+
+SQLALCHEMY_DATABASE_URL=${DB_SCHEMA}://${DB_USER}:${DB_PASSW}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_PORT=
+MAIL_SERVER=
+MAIL_FROM=
+MAIL_FROM_NAME=
+# only MAIL_STARTTLS or MAIL_SSL_TLS can be enabled (True), not both
+MAIL_STARTTLS=
+MAIL_SSL_TLS=
+
+REDIS_PORT=6379
+REDIS_HOST=localhost
+
+SECRET_KEY=
+ALGORITHM=
+
+# CORS origins list, separated by commas or wildcard
+CORS_ORIGINS="*"
+
+# Media cloud
+CLOUDINARY_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
