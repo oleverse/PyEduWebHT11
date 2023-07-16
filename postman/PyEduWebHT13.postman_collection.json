@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "cf930b27-8cc4-4c9a-aa5a-722a6c8c3742",
-		"name": "PyEduWebHT12",
+		"_postman_id": "59d8e00b-7e69-46d9-a8bc-dceec841a777",
+		"name": "PyEduWebHT13",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -481,6 +481,45 @@
 					"path": [
 						"auth",
 						"refresh_token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Change Avatar",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "file",
+					"file": {
+						"src": "/tmp/Screenshot_20230716_141110.png"
+					},
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/users/avatar",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"avatar"
 					]
 				}
 			},
