@@ -3,6 +3,18 @@ from api.conf.config import settings
 
 
 class CrossOriginRequestSharing:
+    """
+    Creates a new CORS config object.
+
+        :param origins: list of origins to add as a CORS HTTP header value
+        :type origins: list[str] | None
+        :param allow_credentials: whether allow credentials in CORS or not
+        :type allow_credentials: bool
+        :param allow_methods: list of allowed methods
+        :type allow_methods: list[str] | None
+        :param allow_headers: list of allowed headers
+        :type allow_headers: list[str] | None
+    """
     WILDCARD_ALL_ALLOWED = ['*']
 
     def __init__(self, origins: list[str] = None, allow_credentials=True,

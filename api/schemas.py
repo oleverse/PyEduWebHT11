@@ -1,5 +1,5 @@
 from datetime import datetime, date
-from typing import List, Optional
+from typing import Optional
 from pydantic import BaseModel, Field, EmailStr
 
 
@@ -17,7 +17,7 @@ class ContactResponse(ContactBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ContactUpdate(ContactBase):
@@ -43,7 +43,7 @@ class UserDb(BaseModel):
     avatar: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserResponse(BaseModel):

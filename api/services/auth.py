@@ -15,6 +15,10 @@ from api.conf.config import settings
 
 
 class Auth:
+    """
+    Authentication and authorization service class
+    """
+
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     SECRET_KEY = settings.secret_key
     ALGORITHM = settings.algorithm
@@ -22,13 +26,40 @@ class Auth:
     redis_data = redis.Redis(host=settings.redis_host, port=settings.redis_port)
 
     def verify_password(self, plain_password, hashed_password):
+        """
+        Starts password verification
+
+        :param plain_password: password in plain text
+        :type plain_password: str
+        :param hashed_password: password in hashed form
+        :type hashed_password: str
+        :return: ``True`` if the password matched the hash, else ``False``.
+        :rtype: bool
+        """
         return self.pwd_context.verify(plain_password, hashed_password)
 
     def get_password_hash(self, password: str):
+        """
+        Runs secret through selected algorithm, returning resulting hash.
+
+        :param password: the password to hash
+        :type password: unicode or bytes
+        :return: The secret as encoded by the specified algorithm and options.
+        """
         return self.pwd_context.hash(password)
 
     # define a function to generate a new access token
     async def create_access_token(self, data: dict, expires_delta: Optional[float] = None):
+        """
+        Creates a JWT access token using user data
+
+        :param data: user data
+        :type data: dict
+        :param expires_delta: optional time delta for controlling expiration period of the token
+        :type expires_delta: float | None
+        :return: encoded JWT access token
+        :rtype: str
+        """
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.utcnow() + timedelta(seconds=expires_delta)
@@ -40,6 +71,16 @@ class Auth:
 
     # define a function to generate a new refresh token
     async def create_refresh_token(self, data: dict, expires_delta: Optional[float] = None):
+        """
+        Creates a JWT refresh token using user data
+
+        :param data: user data
+        :type data: dict
+        :param expires_delta: optional time delta for controlling expiration period of the token
+        :type expires_delta: float | None
+        :return: encoded JWT refresh token
+        :rtype: str
+        """
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.utcnow() + timedelta(seconds=expires_delta)
@@ -50,6 +91,15 @@ class Auth:
         return encoded_refresh_token
 
     async def decode_refresh_token(self, refresh_token: str):
+        """
+        Decodes the given JWT refresh token
+
+        :param refresh_token: the JWT token to decode
+        :type refresh_token: str
+        :return: decoded data (usually email address)
+        :rtype: str
+        :raises: HTTPException
+        """
         try:
             payload = jwt.decode(refresh_token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
             if payload['scope'] == 'refresh_token':
@@ -60,6 +110,17 @@ class Auth:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Could not validate credentials')
 
     async def get_current_user(self, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+        """
+        Retrieves the current user information from the database. User information is cached with Redis
+        with expirtation period in 900 seconds
+
+        :param token: user's JWT token
+        :type token: str
+        :param db: database session
+        :type db: Session
+        :return: user info
+        :rtype: User
+        """
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
@@ -89,6 +150,14 @@ class Auth:
         return user
 
     def create_email_token(self, data: dict):
+        """
+        Creates JWT token using user's email address
+
+        :param data: data which is used for JWT token generation (usually email)
+        :type data: dict
+        :return: JWT token
+        :rtype: str
+        """
         to_encode = data.copy()
         expire = datetime.utcnow() + timedelta(days=7)
         to_encode.update({"iat": datetime.utcnow(), "exp": expire})
@@ -96,6 +165,14 @@ class Auth:
         return token
 
     async def get_email_from_token(self, token: str):
+        """
+        Retrieves email address from given JWT token
+
+        :param token: JWT token to decode
+        :type token: str
+        :return: decoded data (usually email)
+        :rtype: str
+        """
         try:
             payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
             email = payload["sub"]

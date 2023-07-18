@@ -25,6 +25,12 @@ app.include_router(users.router, prefix='/api')
 
 @app.on_event("startup")
 async def startup():
+    """
+    Triggers loading additional components at startup, for instance Rate limiter
+
+    :return:
+    :rtype: None
+    """
     r = await redis.Redis(host=settings.redis_host, port=settings.redis_port, db=0, encoding="utf-8",
                           decode_responses=True)
     await FastAPILimiter.init(r)
@@ -32,4 +38,10 @@ async def startup():
 
 @app.get("/")
 def read_root():
+    """
+    Default API route (i.e. / ) which does nothing
+
+    :return: Greeting string
+    :rtype: str
+    """
     return {"message": "Welcome to PyWebEduHT11!"}

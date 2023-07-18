@@ -16,9 +16,23 @@ security = HTTPBearer()
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED,
-             description='No more than 5 requests per minute',
-             dependencies=[Depends(RateLimiter(times=5, seconds=60))])
+             description='No more than 5 requests per minute')
 async def register(body: UserModel, background_tasks: BackgroundTasks, request: Request, db: Session = Depends(get_db)):
+    """
+    API route for registering new users
+
+    :param body: data of the user which wants to get registered
+    :type body: UserModel
+    :param background_tasks: background tasks object for queueing registration process
+    :type background_tasks: BackgroundTasks
+    :param request: HTTP Request object
+    :type request: Request
+    :param db: database session
+    :type db: Session
+    :return: information about creating of a user
+    :rtype: Dict[str, str]
+    :raises: HTTPException
+    """
     exist_user = await repository_users.get_user_by_email(body.email, db)
     if exist_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Account already exists")
@@ -30,6 +44,17 @@ async def register(body: UserModel, background_tasks: BackgroundTasks, request: 
 
 @router.post("/login", response_model=TokenModel)
 async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    """
+    API route for user authentication (logging in)
+
+    :param body: OAuth2 form data
+    :type body: OAuth2PasswordRequestForm
+    :param db: database session
+    :type db: Session
+    :return: JWT tokens (access, refresh) and the type of tokens. These tokens will be used for authorized access to API
+    :rtype: Dict[str, str]
+    :raises: HTTPException
+    """
     user = await repository_users.get_user_by_email(body.username, db)
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email")
@@ -46,6 +71,16 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
 
 @router.get('/refresh_token', response_model=TokenModel)
 async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(security), db: Session = Depends(get_db)):
+    """
+    API route for refreshing user tokens
+
+    :param credentials: HTTP Authorization credentials
+    :type credentials: HTTPAuthorizationCredentials
+    :param db: database session
+    :type db: Session
+    :return: Newly generated JWT tokens (access, refresh)
+    :raises: HTTPException
+    """
     token = credentials.credentials
     email = await auth_service.decode_refresh_token(token)
     user = await repository_users.get_user_by_email(email, db)
@@ -63,6 +98,17 @@ async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(sec
 
 @router.get('/confirmed_email/{token}')
 async def confirmed_email(token: str, db: Session = Depends(get_db)):
+    """
+    API route to confirm user's email address
+
+    :param token: access token
+    :type token: str
+    :param db: database session
+    :type db: Session
+    :return: message, whether email confirmed or not
+    :rtype: Dict[str, str]
+    :raises: HTTPException
+    """
     email = await auth_service.get_email_from_token(token)
     user = await repository_users.get_user_by_email(email, db)
     if user is None:
@@ -76,6 +122,20 @@ async def confirmed_email(token: str, db: Session = Depends(get_db)):
 @router.post('/request_email')
 async def request_email(body: RequestEmail, background_tasks: BackgroundTasks, request: Request,
                         db: Session = Depends(get_db)):
+    """
+    API route  to request a confirmation email message
+
+    :param body: data of the user which wants to get registered
+    :type body: UserModel
+    :param background_tasks: background tasks object for queueing registration process
+    :type background_tasks: BackgroundTasks
+    :param request: HTTP Request object
+    :type request: Request
+    :param db: database session
+    :type db: Session
+    :return: notification, whether email confirmation message sent or the email address does not need confirmation
+    :rtype: Dict[str, str]
+    """
     user = await repository_users.get_user_by_email(body.email, db)
 
     if user.confirmed:

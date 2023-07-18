@@ -24,6 +24,19 @@ conf = ConnectionConfig(
 
 
 async def send_email(email: EmailStr, username: str, host: str):
+    """
+    Sends an email message using FastMail.
+    Prints an error message if the mail was not sent.
+
+    :param email: valid email address
+    :type email: str
+    :param username: username which is used in the message's template
+    :type username: str
+    :param host: host name which is used in the message's template
+    :type host: str
+    :return:
+    :rtype: None
+    """
     try:
         token_verification = auth_service.create_email_token({"sub": email})
         message = MessageSchema(
